@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web AR Lottie Animation</title>
+
+    <!-- Lottie Player -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+    <!-- A-Frame + AR.js -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe-ar@1.8.0/dist/aframe-ar.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        /* Hide the 2D lottie container so only AR version shows */
+        #lottie {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Hidden Lottie animation source -->
+    <lottie-player id="lottie"
+                   src="data.json"
+                   background="transparent"
+                   speed="1"
+                   style="width: 300px; height: 600px;"
+                   loop
+                   autoplay>
+    </lottie-player>
+
+    <!-- AR Scene -->
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      renderer="logarithmicDepthBuffer: true;"
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
+
+        <!-- Place your animation in front of the camera -->
+        <a-entity position="0 0 -2">
+            <a-entity geometry="primitive: plane; width: 1; height: 1"
+                      material="shader: html; target: #lottie">
+            </a-entity>
+        </a-entity>
+
+        <!-- Camera -->
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+</html>
