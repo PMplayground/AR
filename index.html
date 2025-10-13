@@ -18,15 +18,15 @@
   device-orientation-permission-ui="enabled: true">
 
   <!-- Animation plane -->
-  <a-plane id="anim-plane" position="0 0 -2" width="1.5" height="1.5"
-           material="src: url(frames/frame_0001.png); transparent: true">
+  <a-plane id="anim-plane" position="0 0 -3" width="3" height="5"
+           material="src: url(frames/frame_0001.png); transparent: true; opacity: 1.0;">
   </a-plane>
 
   <a-entity camera></a-entity>
 </a-scene>
 
 <script>
-  const totalFrames = 130; // Adjust for your PNG count
+  const totalFrames = 131; // Adjust for your PNG count
   const plane = document.querySelector('#anim-plane');
   let currentFrame = 1;
 
@@ -38,7 +38,10 @@
 
     currentFrame = currentFrame < totalFrames ? currentFrame + 1 : 1;
 
-    setTimeout(animate, 33); // ~30fps
+    setTimeout(() => {
+  animate();
+}, 3000); // 3 seconds
+
   }
 
   animate();
@@ -46,6 +49,7 @@
 
 </body>
 </html>
+
 
 
 
