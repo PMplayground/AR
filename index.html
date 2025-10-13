@@ -2,30 +2,44 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR PNG Sequence Animation (Auto Detect frame_0001 format)</title>
+    <title>AR PNG Sequence Animation</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
+      .loading { 
+        position: absolute; 
+        top: 50%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        color: white; 
+        z-index: 1000; 
+        font-family: Arial; 
+      }
     </style>
   </head>
 
   <body>
+    <div id="loading" class="loading">Loading AR experience...</div>
+    
     <a-scene
       embedded
-      arjs="sourceType: webcam; debugUIEnabled: false;"
+      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
       vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true;"
     >
-      <a-assets id="assets"></a-assets>
+      <a-assets>
+        <!-- Assets will be added dynamically -->
+      </a-assets>
 
-      <a-marker preset="hiro">
-        <a-plane id="animPlane"
-          position="0 0.5 0"
+      <a-marker type="pattern" preset="custom" url="assets/pattern-marker.patt">
+        <a-plane
+          id="animPlane"
+          position="0 0 0"
           rotation="-90 0 0"
-          width="2"
-          height="3"
-          material="transparent: true; opacity: 1;"
+          width="1.5"
+          height="1.5"
+          material="side: double; transparent: true; alphaTest: 0.5;"
         ></a-plane>
       </a-marker>
 
@@ -33,57 +47,127 @@
     </a-scene>
 
     <script>
-      const assetsEl = document.getElementById("assets");
-      const plane = document.getElementById("animPlane");
+      const sceneEl = document.querySelector('a-scene');
+      const assetsEl = document.querySelector('a-assets');
+      const plane = document.getElementById('animPlane');
+      const loadingEl = document.getElementById('loading');
 
-      // Adjust for your filename format (frame_0001.png, frame_0002.png, etc.)
-      let frameIndex = 1;
-      const framePaths = [];
+      let framePaths = [];
+      let totalFrames = 0;
+
+      // Wait for scene to load before starting animation
+      sceneEl.addEventListener('loaded', function() {
+        console.log('Scene loaded, checking frames...');
+        checkFrames();
+      });
 
       async function checkFrames() {
-        while (true) {
-          const frameNumber = String(frameIndex).padStart(4, "0"); // ensures 0001, 0002, etc.
-          const path = `assets/frame_${frameNumber}.png`;
-          try {
-            const res = await fetch(path, { method: 'HEAD' });
-            if (!res.ok) break;
-            framePaths.push(path);
-            frameIndex++;
-          } catch {
+        loadingEl.textContent = 'Checking for frame sequences...';
+        
+        // Test different frame naming patterns
+        const patterns = [
+          'assets/frame_${num}.png',
+          'assets/frame_${num4}.png', 
+          'assets/frame${num}.png',
+          'assets/frame${num4}.png'
+        ];
+
+        let foundFrames = false;
+
+        for (const pattern of patterns) {
+          framePaths = [];
+          frameIndex = 1;
+          
+          while (frameIndex <= 100) { // Reasonable limit
+            const num4 = String(frameIndex).padStart(4, "0");
+            const num = String(frameIndex);
+            const path = pattern.replace('${num4}', num4).replace('${num}', num);
+            
+            try {
+              const response = await fetch(path, { method: 'HEAD' });
+              if (response.ok) {
+                framePaths.push(path);
+                frameIndex++;
+              } else {
+                break;
+              }
+            } catch (err) {
+              break;
+            }
+          }
+
+          if (framePaths.length > 0) {
+            console.log(`Found ${framePaths.length} frames with pattern: ${pattern}`);
+            foundFrames = true;
             break;
           }
         }
 
-        if (framePaths.length === 0) {
-          console.error("❌ No frames found in /assets/ named frame_0001.png, frame_0002.png...");
+        if (!foundFrames) {
+          loadingEl.textContent = '❌ No frame sequences found. Check file names and path.';
+          console.error('No frames found. Expected: frame_0001.png, frame_0002.png, etc. in assets/ folder');
           return;
         }
 
-        // Preload images
-        framePaths.forEach((path, i) => {
-          const img = document.createElement("img");
-          img.setAttribute("id", `frame${i+1}`);
-          img.setAttribute("src", path);
-          assetsEl.appendChild(img);
-        });
-
-        // Start animation
-        animateFrames();
+        loadingEl.textContent = `Loading ${framePaths.length} frames...`;
+        await preloadFrames();
       }
 
-      function animateFrames() {
+      async function preloadFrames() {
+        const loadPromises = framePaths.map((path, index) => {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => {
+              console.error(`Failed to load: ${path}`);
+              resolve();
+            };
+            img.src = path;
+            
+            // Add to A-Frame assets
+            const assetId = `frame${index + 1}`;
+            const imgEl = document.createElement('img');
+            imgEl.setAttribute('id', assetId);
+            imgEl.setAttribute('src', path);
+            assetsEl.appendChild(imgEl);
+          });
+        });
+
+        await Promise.all(loadPromises);
+        loadingEl.style.display = 'none';
+        startAnimation();
+      }
+
+      function startAnimation() {
         let currentFrame = 0;
-        const frameDelay = 100; // ms per frame — adjust for speed
-        const totalFrames = framePaths.length;
+        const fps = 15; // Adjust frame rate
+        const frameDelay = 1000 / fps;
+
+        console.log(`Starting animation with ${framePaths.length} frames at ${fps} FPS`);
 
         setInterval(() => {
-          currentFrame = (currentFrame + 1) % totalFrames;
+          currentFrame = (currentFrame + 1) % framePaths.length;
           const srcId = `#frame${currentFrame + 1}`;
-          plane.setAttribute("material", "src", srcId);
+          
+          plane.setAttribute('material', {
+            src: srcId,
+            transparent: true,
+            alphaTest: 0.1
+          });
+          
+          // Debug: log every 30 frames
+          if (currentFrame % 30 === 0) {
+            console.log(`Frame ${currentFrame + 1}/${framePaths.length}`);
+          }
         }, frameDelay);
       }
 
-      checkFrames();
+      // Fallback: if no frames found after 5 seconds, show error
+      setTimeout(() => {
+        if (framePaths.length === 0 && loadingEl.textContent.includes('Loading')) {
+          loadingEl.textContent = '❌ Frame loading timeout. Check console for errors.';
+        }
+      }, 5000);
     </script>
   </body>
 </html>
