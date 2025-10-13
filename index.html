@@ -18,7 +18,9 @@
 <a-scene
   embedded
   vr-mode-ui="enabled: false"
-  arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: true;">
+   arjs="sourceType: webcam; trackingMethod: best; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;"
+  renderer="antialias: true; alpha: true;"
+  device-orientation-permission-ui="enabled: true"
 
   <!-- Plane to display animation -->
   <a-plane id="anim-plane" position="0 0 0" width="1" height="1" material="src: url(frames/frame_0001.png); transparent: true"></a-plane>
@@ -50,6 +52,7 @@
 
 </body>
 </html>
+
 
 
 
