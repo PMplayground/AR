@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR PNG Sequence Animation (Auto Detect)</title>
+    <title>AR PNG Sequence Animation (Auto Detect frame_0001 format)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
     <style>
@@ -33,18 +33,17 @@
     </a-scene>
 
     <script>
-      // 🔍 Automatically detect and load frames
       const assetsEl = document.getElementById("assets");
       const plane = document.getElementById("animPlane");
 
-      // GitHub Pages doesn’t allow directory listing, so we define frames dynamically
-      // by testing frame1.png, frame2.png, etc. until one is missing.
+      // Adjust for your filename format (frame_0001.png, frame_0002.png, etc.)
       let frameIndex = 1;
       const framePaths = [];
 
       async function checkFrames() {
         while (true) {
-          const path = `assets/frame${frameIndex}.png`;
+          const frameNumber = String(frameIndex).padStart(4, "0"); // ensures 0001, 0002, etc.
+          const path = `assets/frame_${frameNumber}.png`;
           try {
             const res = await fetch(path, { method: 'HEAD' });
             if (!res.ok) break;
@@ -56,11 +55,11 @@
         }
 
         if (framePaths.length === 0) {
-          console.error("❌ No frames found in /assets/ named frame1.png, frame2.png...");
+          console.error("❌ No frames found in /assets/ named frame_0001.png, frame_0002.png...");
           return;
         }
 
-        // Add <img> tags to <a-assets> for preloading
+        // Preload images
         framePaths.forEach((path, i) => {
           const img = document.createElement("img");
           img.setAttribute("id", `frame${i+1}`);
@@ -74,7 +73,7 @@
 
       function animateFrames() {
         let currentFrame = 0;
-        const frameDelay = 150; // ms per frame
+        const frameDelay = 100; // ms per frame — adjust for speed
         const totalFrames = framePaths.length;
 
         setInterval(() => {
@@ -88,16 +87,3 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
