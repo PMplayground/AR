@@ -2,82 +2,37 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR PNG Sequence</title>
+    <title>WebAR Animation</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-      .loading { 
-        position: absolute; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%); 
-        color: white; 
-        background: rgba(0,0,0,0.8);
-        padding: 20px;
-        border-radius: 10px;
-        z-index: 1000; 
-        font-family: Arial; 
-      }
-    </style>
   </head>
-
   <body>
-    <div id="loading" class="loading">Loading AR... Show Hiro marker to camera</div>
-    
-    <a-scene
-      embedded
-      arjs="sourceType: webcam; debugUIEnabled: false;"
-      vr-mode-ui="enabled: false"
-      renderer="alpha: true;"
-    >
-      <a-assets>
-        <img id="testFrame" src="assets/frame_0001.png">
-      </a-assets>
-
+    <a-scene embedded arjs>
       <a-marker preset="hiro">
-        <a-plane
-          id="animPlane"
+        <!-- DIRECT IMAGE APPROACH - No preloading -->
+        <a-image
+          id="animatedImage"
+          src="assets/frame_0001.png"
+          width="2"
+          height="2"
           position="0 0.5 0"
-          width="1.5"
-          height="1.5"
-          material="src: #testFrame; transparent: true; alphaTest: 0.1;"
-        ></a-plane>
+          transparent="true"
+          alpha-test="0.1"
+        ></a-image>
       </a-marker>
-
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      const loadingEl = document.getElementById('loading');
-      const plane = document.getElementById('animPlane');
-      const TOTAL_FRAMES = 120;
+      const imageEl = document.getElementById('animatedImage');
       let currentFrame = 1;
+      const totalFrames = 120;
 
-      // Simple animation loop
-      function startAnimation() {
-        loadingEl.style.display = 'none';
-        
-        setInterval(() => {
-          currentFrame = (currentFrame % TOTAL_FRAMES) + 1;
-          const frameNumber = String(currentFrame).padStart(4, "0");
-          const newSrc = `assets/frame_${frameNumber}.png`;
-          
-          // Force reload by adding timestamp
-          plane.setAttribute('material', 'src', newSrc + '?t=' + Date.now());
-        }, 1000 / 30); // 30 FPS
-      }
-
-      // Start when a single frame loads
-      document.querySelector('#testFrame').addEventListener('load', function() {
-        console.log('First frame loaded, starting animation...');
-        startAnimation();
-      });
-
-      // Error handling
-      document.querySelector('#testFrame').addEventListener('error', function() {
-        loadingEl.textContent = 'Error loading frames. Check file paths.';
-      });
+      setInterval(() => {
+        currentFrame = (currentFrame % totalFrames) + 1;
+        const frameNum = String(currentFrame).padStart(4, '0');
+        imageEl.setAttribute('src', `assets/frame_${frameNum}.png?v=${Date.now()}`);
+      }, 33); // ~30fps
     </script>
   </body>
 </html>
