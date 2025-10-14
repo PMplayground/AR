@@ -2,88 +2,87 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR PNG Sequence Animation (Auto Detect frame_0001 format)</title>
+    <title>AR PNG Sequence Animation</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
+      .loading { 
+        position: absolute; 
+        top: 50%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        color: white; 
+        background: rgba(0,0,0,0.8);
+        padding: 20px;
+        border-radius: 10px;
+        z-index: 1000; 
+        font-family: Arial; 
+      }
+      .debug { 
+        position: absolute; 
+        top: 10px; 
+        left: 10px; 
+        color: white; 
+        background: rgba(0,0,0,0.7);
+        padding: 10px;
+        z-index: 1000;
+        font-family: Arial;
+        font-size: 12px;
+      }
     </style>
   </head>
 
   <body>
+    <div id="loading" class="loading">Loading AR experience...</div>
+    <div id="debug" class="debug"></div>
+    
     <a-scene
       embedded
       arjs="sourceType: webcam; debugUIEnabled: false;"
       vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true;"
     >
-      <a-assets id="assets"></a-assets>
+      <a-assets id="assets">
+        <!-- Assets will be added here -->
+      </a-assets>
 
       <a-marker preset="hiro">
-        <a-plane id="animPlane"
-          position="0 0.5 0"
-          rotation="-90 0 0"
-          width="2"
-          height="3"
-          material="transparent: true; opacity: 1;"
+        <a-plane
+          id="animPlane"
+          position="0 0 0"
+          rotation="0 0 0"  <!-- CHANGED: No rotation for now -->
+          width="1"
+          height="1"
+          material="src: #defaultFrame; transparent: true; alphaTest: 0.1;"
         ></a-plane>
       </a-marker>
+
+      <!-- Add a default test frame -->
+      <a-assets>
+        <img id="defaultFrame" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">
+      </a-assets>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <script>
-      const assetsEl = document.getElementById("assets");
-      const plane = document.getElementById("animPlane");
+const sceneEl = document.querySelector('a-scene');
 
-      // Adjust for your filename format (frame_0001.png, frame_0002.png, etc.)
-      let frameIndex = 1;
-      const framePaths = [];
-
-      async function checkFrames() {
-        while (true) {
-          const frameNumber = String(frameIndex).padStart(4, "0"); // ensures 0001, 0002, etc.
-          const path = `assets/frame_${frameNumber}.png`;
-          try {
-            const res = await fetch(path, { method: 'HEAD' });
-            if (!res.ok) break;
-            framePaths.push(path);
-            frameIndex++;
-          } catch {
-            break;
-          }
-        }
-
-        if (framePaths.length === 0) {
-          console.error("❌ No frames found in /assets/ named frame_0001.png, frame_0002.png...");
-          return;
-        }
-
-        // Preload images
-        framePaths.forEach((path, i) => {
-          const img = document.createElement("img");
-          img.setAttribute("id", `frame${i+1}`);
-          img.setAttribute("src", path);
-          assetsEl.appendChild(img);
-        });
-
-        // Start animation
-        animateFrames();
-      }
-
-      function animateFrames() {
-        let currentFrame = 0;
-        const frameDelay = 100; // ms per frame — adjust for speed
-        const totalFrames = framePaths.length;
-
-        setInterval(() => {
-          currentFrame = (currentFrame + 1) % totalFrames;
-          const srcId = `#frame${currentFrame + 1}`;
-          plane.setAttribute("material", "src", srcId);
-        }, frameDelay);
-      }
-
-      checkFrames();
-    </script>
+sceneEl.addEventListener('loaded', function() {
+  console.log('Scene loaded - testing with simple animation');
+  
+  // Create a simple animated cube that's always visible
+  const cube = document.createElement('a-box');
+  cube.setAttribute('position', '0 0 -2');
+  cube.setAttribute('width', '0.5');
+  cube.setAttribute('height', '0.5');
+  cube.setAttribute('depth', '0.5');
+  cube.setAttribute('color', '#4CC3D9');
+  cube.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 2000');
+  
+  sceneEl.appendChild(cube);
+  console.log('Added test cube - you should see a rotating blue cube');
+});
   </body>
 </html>
+
