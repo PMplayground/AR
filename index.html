@@ -1,34 +1,23 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>WebAR Animation</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
   </head>
   <body>
- <a-scene embedded arjs>
+    <a-scene embedded arjs>
       <a-marker preset="hiro">
-        <a-entity
-          gltf-model="url(assets/animation.glb)"
-          animation-mixer="clip: *; loop: repeat"
-          scale="5 5 5"
-        ></a-entity>
+        <a-image id="anim" src="assets/frame_0001.png" width="1.5" height="1.5" position="0 0.5 0" transparent="true"></a-image>
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      const imageEl = document.getElementById('animatedImage');
-      let currentFrame = 1;
-      const totalFrames = 120;
-
+      let frame = 1;
       setInterval(() => {
-        currentFrame = (currentFrame % totalFrames) + 1;
-        const frameNum = String(currentFrame).padStart(4, '0');
-        imageEl.setAttribute('src', `assets/frame_${frameNum}.png?v=${Date.now()}`);
-      }, 33); // ~30fps
+        frame = (frame % 120) + 1;
+        document.getElementById('anim').setAttribute('src', `assets/frame_${String(frame).padStart(4, '0')}.png`);
+      }, 33);
     </script>
   </body>
 </html>
-
