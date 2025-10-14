@@ -1,21 +1,71 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
+    <title>Working WebAR Example</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
     <style>
-      body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; }
-      a-scene { width: 100%; height: 100%; display: block; }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .instructions {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            font-family: Arial;
+            font-size: 18px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            z-index: 1000;
+        }
     </style>
-  </head>
-  <body>
-    <a-scene vr-mode-ui="enabled: false" embedded arjs>
-      <a-marker preset="hiro">
-        <a-box color="blue" position="0 0.5 0" scale="0.5 0.5 0.5" 
-               animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
-      </a-marker>
-      <a-entity camera></a-entity>
+</head>
+<body>
+    <div class="instructions" id="instructions">
+        Point camera at this Hiro marker:<br>
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" width="100" style="margin: 10px;">
+    </div>
+
+    <a-scene 
+        vr-mode-ui="enabled: false"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
+        renderer="logarithmicDepthBuffer: true;"
+        embedded>
+
+        <a-marker type="pattern" preset="custom" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.patt">
+            <a-box 
+                position="0 0.5 0" 
+                color="blue"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 2000">
+            </a-box>
+            <a-text 
+                value="IT WORKS!" 
+                position="0 1.2 0" 
+                align="center"
+                color="red">
+            </a-text>
+        </a-marker>
+
+        <a-entity camera></a-entity>
     </a-scene>
-  </body>
+
+    <script>
+        // Remove instructions after 10 seconds
+        setTimeout(() => {
+            document.getElementById('instructions').style.display = 'none';
+        }, 10000);
+
+        // Log when marker is found
+        const marker = document.querySelector('a-marker');
+        marker.addEventListener('markerFound', () => {
+            console.log('🎯 Marker found! AR is working!');
+        });
+    </script>
+</body>
 </html>
