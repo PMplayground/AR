@@ -19,23 +19,11 @@
         z-index: 1000; 
         font-family: Arial; 
       }
-      .debug { 
-        position: absolute; 
-        top: 10px; 
-        left: 10px; 
-        color: white; 
-        background: rgba(0,0,0,0.7);
-        padding: 10px;
-        z-index: 1000;
-        font-family: Arial;
-        font-size: 12px;
-      }
     </style>
   </head>
 
   <body>
     <div id="loading" class="loading">Loading AR experience...</div>
-    <div id="debug" class="debug"></div>
     
     <a-scene
       embedded
@@ -51,93 +39,65 @@
         <a-plane
           id="animPlane"
           position="0 0 0"
-          rotation="0 0 0"  <!-- CHANGED: No rotation for now -->
-          width="3"
-          height="5"
-          material="src: #defaultFrame; transparent: true; alphaTest: 0.1;"
+          rotation="0 0 0"
+          width="1"
+          height="1"
+          material="src: #defaultFrame; transparent: true; alphaTest: 0.5; opacity: 1;"
         ></a-plane>
       </a-marker>
-
-      <!-- Add a default test frame -->
-      <a-assets>
-        <img id="defaultFrame" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">
-      </a-assets>
 
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
       const loadingEl = document.getElementById('loading');
-      const debugEl = document.getElementById('debug');
       const assetsEl = document.getElementById('assets');
       const plane = document.getElementById('animPlane');
 
-      const TOTAL_FRAMES = 131; // CHANGE THIS to your actual frame count
+      const TOTAL_FRAMES = 60; // Change to your frame count
       let framePaths = [];
       let currentFrame = 0;
 
-      function updateDebug(info) {
-        debugEl.innerHTML = info;
-        console.log(info);
-      }
-
       function initializeAnimation() {
-        updateDebug('Initializing animation...');
         loadingEl.textContent = 'Setting up animation...';
         
-        // Generate frame paths
         framePaths = [];
         for (let i = 1; i <= TOTAL_FRAMES; i++) {
           const frameNumber = String(i).padStart(4, "0");
           framePaths.push(`assets/frame_${frameNumber}.png`);
         }
         
-        updateDebug(`Generated ${framePaths.length} frame paths`);
         preloadFrames();
       }
 
       function preloadFrames() {
-        updateDebug('Starting frame preload...');
         loadingEl.textContent = `Preloading ${framePaths.length} frames...`;
         
         let loadedCount = 0;
-        let errorCount = 0;
 
         framePaths.forEach((path, index) => {
           const img = new Image();
           img.onload = function() {
             loadedCount++;
-            updateDebug(`Loaded: ${loadedCount}/${framePaths.length} frames`);
             loadingEl.textContent = `Loading frames... ${loadedCount}/${framePaths.length}`;
             
-            // Add to A-Frame assets
             const imgEl = document.createElement('img');
             imgEl.setAttribute('id', `frame${index + 1}`);
             imgEl.setAttribute('src', path);
             assetsEl.appendChild(imgEl);
 
-            if (loadedCount + errorCount === framePaths.length) {
-              if (loadedCount > 0) {
-                loadingEl.style.display = 'none';
-                startAnimation();
-              } else {
-                loadingEl.textContent = '❌ No frames loaded! Check file paths.';
-              }
+            if (loadedCount === framePaths.length) {
+              loadingEl.style.display = 'none';
+              startAnimation();
             }
           };
           
           img.onerror = function() {
-            errorCount++;
             console.error(`Failed to load: ${path}`);
-            updateDebug(`Error loading: ${path}`);
-            
-            if (loadedCount + errorCount === framePaths.length) {
-              if (loadedCount > 0) {
-                loadingEl.style.display = 'none';
-                startAnimation();
-              } else {
-                loadingEl.textContent = '❌ All frames failed to load!';
-              }
+            loadedCount++;
+            if (loadedCount === framePaths.length) {
+              loadingEl.style.display = 'none';
+              startAnimation();
             }
           };
           
@@ -146,60 +106,33 @@
       }
 
       function startAnimation() {
-        updateDebug('🎬 Starting animation!');
+        console.log('Starting animation with transparency fix');
         
-        const fps = 30;
+        const fps = 24;
         const frameDelay = 1000 / fps;
-        let frameCounter = 0;
 
         const animationInterval = setInterval(() => {
           currentFrame = (currentFrame + 1) % framePaths.length;
           const srcId = `#frame${currentFrame + 1}`;
-          frameCounter++;
           
-          // Update the plane material
+          // CRITICAL: Set all material properties for transparency
           plane.setAttribute('material', {
             src: srcId,
             transparent: true,
-            alphaTest: 0.1
+            alphaTest: 0.1,    // Adjust this value (0.1 to 0.5)
+            opacity: 1,
+            side: 'double'     // Render both sides
           });
-          
-          updateDebug(`Frame: ${currentFrame + 1}/${framePaths.length} | Total: ${frameCounter}`);
           
         }, frameDelay);
 
         plane.animationInterval = animationInterval;
       }
 
-      // Add marker found/lost events to debug visibility
-      const marker = document.querySelector('a-marker');
-      marker.addEventListener('markerFound', () => {
-        updateDebug('🎯 MARKER FOUND! Animation should be visible');
-      });
-      
-      marker.addEventListener('markerLost', () => {
-        updateDebug('❌ MARKER LOST');
-      });
-
       // Start when scene loads
       document.querySelector('a-scene').addEventListener('loaded', function() {
-        updateDebug('Scene loaded');
         initializeAnimation();
       });
-
-      // Test if plane is visible without marker
-      setTimeout(() => {
-        // Create a test plane that's always visible
-        const testPlane = document.createElement('a-plane');
-        testPlane.setAttribute('position', '0 0 -2');
-        testPlane.setAttribute('width', '1');
-        testPlane.setAttribute('height', '1');
-        testPlane.setAttribute('color', 'red');
-        testPlane.setAttribute('material', 'src', '#frame1');
-        document.querySelector('a-scene').appendChild(testPlane);
-        updateDebug('Added test plane (should see red square)');
-      }, 2000);
     </script>
   </body>
 </html>
-
