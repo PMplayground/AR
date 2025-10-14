@@ -1,92 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>WebAR Animation</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
+<head>
+    <title>Hiro Marker</title>
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      }
-      #arScene {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-      .debug {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        color: white;
-        background: rgba(0,0,0,0.7);
-        padding: 10px;
-        z-index: 1000;
-        font-family: Arial;
-      }
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
+        .marker-container {
+            text-align: center;
+        }
+        .marker {
+            width: 400px;
+            height: 400px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            margin-top: 20px;
+            font-family: Arial;
+        }
     </style>
-  </head>
-  <body>
-    <div class="debug" id="debug">Point camera at Hiro marker</div>
-    
-    <a-scene 
-      id="arScene"
-      embedded
-      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-      vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true;"
-    >
-      <!-- Hiro Marker -->
-      <a-marker preset="hiro" emitevents="true" cursor="fuse: false; rayOrigin: mouse;">
-        <!-- Simple rotating cube to test -->
-        <a-box 
-          color="red"
-          position="0 0.5 0"
-          scale="0.5 0.5 0.5"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"
-        ></a-box>
-      </a-marker>
-      
-      <!-- Camera -->
-      <a-entity camera></a-entity>
-    </a-scene>
-
-    <script>
-      const debug = document.getElementById('debug');
-      
-      // Wait for scene to load
-      const scene = document.querySelector('a-scene');
-      
-      scene.addEventListener('loaded', function() {
-        debug.textContent = 'AR Scene loaded - Show Hiro marker to camera';
-        console.log('Scene loaded successfully');
-      });
-
-      // Marker events
-      const marker = document.querySelector('a-marker');
-      
-      marker.addEventListener('markerFound', function() {
-        debug.textContent = '🎯 Marker Found! You should see a rotating red cube';
-        console.log('Marker found');
-      });
-      
-      marker.addEventListener('markerLost', function() {
-        debug.textContent = '❌ Marker Lost - Show Hiro marker';
-        console.log('Marker lost');
-      });
-
-      // Check if WebGL is supported
-      if (!AFRAME.utils.device.checkWebGLSupport()) {
-        debug.textContent = 'WebGL not supported - cannot display AR';
-        console.error('WebGL not supported');
-      }
-    </script>
-  </body>
+</head>
+<body>
+    <div class="marker-container">
+        <div class="marker">
+            <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" 
+                 width="360" height="360" alt="Hiro Marker">
+        </div>
+        <div class="instructions">
+            <h3>Hiro Marker Instructions:</h3>
+            <p>1. Print this marker or display on another device</p>
+            <p>2. Point your camera at the marker</p>
+            <p>3. The AR content should appear on top of the marker</p>
+        </div>
+    </div>
+</body>
 </html>
