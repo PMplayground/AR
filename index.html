@@ -1,74 +1,92 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>WebAR Animation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
     <style>
-      body { margin: 0; overflow: hidden; }
-      .debug { position: absolute; top: 10px; left: 10px; color: white; background: black; padding: 10px; z-index: 1000; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #arScene {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .debug {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        background: rgba(0,0,0,0.7);
+        padding: 10px;
+        z-index: 1000;
+        font-family: Arial;
+      }
     </style>
   </head>
   <body>
-    <div class="debug" id="debug">Loading...</div>
+    <div class="debug" id="debug">Point camera at Hiro marker</div>
     
-    <a-scene embedded arjs>
-      <a-marker preset="hiro">
-        <!-- TEST with a simple colored box first -->
+    <a-scene 
+      id="arScene"
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true;"
+    >
+      <!-- Hiro Marker -->
+      <a-marker preset="hiro" emitevents="true" cursor="fuse: false; rayOrigin: mouse;">
+        <!-- Simple rotating cube to test -->
         <a-box 
-          id="testBox"
-          color="red" 
-          position="0 0.5 0" 
-          width="0.5" 
-          height="0.5" 
-          depth="0.5"
-          animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"
+          color="red"
+          position="0 0.5 0"
+          scale="0.5 0.5 0.5"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"
         ></a-box>
-        
-        <!-- Then try the image -->
-        <a-image
-          id="animatedImage"
-          src="assets/frame_0001.png"
-          width="0.5"
-          height="0.5"
-          position="0 1.2 0"  <!-- Above the test box -->
-          transparent="true"
-          visible="true"
-        ></a-image>
       </a-marker>
       
+      <!-- Camera -->
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
       const debug = document.getElementById('debug');
-      const imageEl = document.getElementById('animatedImage');
-      let currentFrame = 1;
-      const totalFrames = 120;
       
-      // Test if marker is detected
+      // Wait for scene to load
+      const scene = document.querySelector('a-scene');
+      
+      scene.addEventListener('loaded', function() {
+        debug.textContent = 'AR Scene loaded - Show Hiro marker to camera';
+        console.log('Scene loaded successfully');
+      });
+
+      // Marker events
       const marker = document.querySelector('a-marker');
-      marker.addEventListener('markerFound', () => {
-        debug.textContent = 'Marker found!';
-      });
-      marker.addEventListener('markerLost', () => {
-        debug.textContent = 'Marker lost';
+      
+      marker.addEventListener('markerFound', function() {
+        debug.textContent = '🎯 Marker Found! You should see a rotating red cube';
+        console.log('Marker found');
       });
       
-      // Animation
-      setInterval(() => {
-        currentFrame = (currentFrame % totalFrames) + 1;
-        const frameNum = String(currentFrame).padStart(4, '0');
-        imageEl.setAttribute('src', `assets/frame_${frameNum}.png`);
-        debug.textContent = `Frame: ${frameNum} | Marker: Found`;
-      }, 1000 / 30);
-      
-      // Check if images load
-      imageEl.addEventListener('load', () => {
-        console.log('Image loaded successfully');
+      marker.addEventListener('markerLost', function() {
+        debug.textContent = '❌ Marker Lost - Show Hiro marker';
+        console.log('Marker lost');
       });
-      imageEl.addEventListener('error', () => {
-        debug.textContent = 'ERROR loading image';
-      });
+
+      // Check if WebGL is supported
+      if (!AFRAME.utils.device.checkWebGLSupport()) {
+        debug.textContent = 'WebGL not supported - cannot display AR';
+        console.error('WebGL not supported');
+      }
     </script>
   </body>
 </html>
