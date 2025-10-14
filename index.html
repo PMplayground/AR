@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR PNG Sequence Animation</title>
+    <title>AR PNG Sequence</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
     <style>
@@ -19,42 +19,29 @@
         z-index: 1000; 
         font-family: Arial; 
       }
-      .debug {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        color: white;
-        background: rgba(0,0,0,0.7);
-        padding: 10px;
-        font-family: Arial;
-        font-size: 12px;
-        z-index: 1000;
-      }
     </style>
   </head>
 
   <body>
-    <div id="loading" class="loading">Loading AR experience...</div>
-    <div id="debug" class="debug"></div>
+    <div id="loading" class="loading">Loading AR... Show Hiro marker to camera</div>
     
     <a-scene
       embedded
       arjs="sourceType: webcam; debugUIEnabled: false;"
       vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; alpha: true;"
+      renderer="alpha: true;"
     >
-      <a-assets id="assets">
-        <!-- Assets will be added here -->
+      <a-assets>
+        <img id="testFrame" src="assets/frame_0001.png">
       </a-assets>
 
       <a-marker preset="hiro">
         <a-plane
           id="animPlane"
           position="0 0.5 0"
-          rotation="0 0 0"  <!-- Reset rotation for testing -->
           width="1.5"
           height="1.5"
-          material="transparent: true; alphaTest: 0.01; opacity: 1; side: double;"
+          material="src: #testFrame; transparent: true; alphaTest: 0.1;"
         ></a-plane>
       </a-marker>
 
@@ -63,174 +50,34 @@
 
     <script>
       const loadingEl = document.getElementById('loading');
-      const debugEl = document.getElementById('debug');
-      const assetsEl = document.getElementById('assets');
       const plane = document.getElementById('animPlane');
-
       const TOTAL_FRAMES = 120;
-      let framePaths = [];
-      let currentFrame = 0;
+      let currentFrame = 1;
 
-      function updateDebug(message) {
-        debugEl.textContent = message;
-        console.log(message);
-      }
-
-      function initializeAnimation() {
-        updateDebug('Setting up animation...');
+      // Simple animation loop
+      function startAnimation() {
+        loadingEl.style.display = 'none';
         
-        framePaths = [];
-        for (let i = 1; i <= TOTAL_FRAMES; i++) {
-          const frameNumber = String(i).padStart(4, "0");
-          framePaths.push(`assets/frame_${frameNumber}.png`);
-        }
-        
-        preloadFrames();
-      }
-
-      function preloadFrames() {
-        updateDebug(`Preloading ${framePaths.length} frames...`);
-        
-        let loadedCount = 0;
-        let hasTransparency = false;
-
-        framePaths.forEach((path, index) => {
-          const img = new Image();
-          img.crossOrigin = "anonymous"; // Important for some browsers
-          img.onload = function() {
-            // Test if image has transparency (check first frame only)
-            if (index === 0) {
-              hasTransparency = testImageTransparency(img);
-              updateDebug(`Transparency test: ${hasTransparency ? 'YES' : 'NO'}`);
-            }
-            
-            loadedCount++;
-            updateDebug(`Loaded ${loadedCount}/${framePaths.length} - Transparency: ${hasTransparency}`);
-            
-            const imgEl = document.createElement('img');
-            imgEl.setAttribute('id', `frame${index + 1}`);
-            imgEl.setAttribute('src', path);
-            imgEl.setAttribute('crossorigin', 'anonymous');
-            assetsEl.appendChild(imgEl);
-
-            if (loadedCount === framePaths.length) {
-              loadingEl.style.display = 'none';
-              startAnimation(hasTransparency);
-            }
-          };
+        setInterval(() => {
+          currentFrame = (currentFrame % TOTAL_FRAMES) + 1;
+          const frameNumber = String(currentFrame).padStart(4, "0");
+          const newSrc = `assets/frame_${frameNumber}.png`;
           
-          img.onerror = function() {
-            console.error(`Failed to load: ${path}`);
-            loadedCount++;
-            if (loadedCount === framePaths.length) {
-              loadingEl.style.display = 'none';
-              startAnimation(false);
-            }
-          };
-          
-          img.src = path + '?v=' + Date.now(); // Cache bust
-        });
+          // Force reload by adding timestamp
+          plane.setAttribute('material', 'src', newSrc + '?t=' + Date.now());
+        }, 1000 / 30); // 30 FPS
       }
 
-      // Function to test if image has transparency
-      function testImageTransparency(img) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        // Check if any pixel has alpha < 255
-        for (let i = 3; i < data.length; i += 4) {
-          if (data[i] < 255) {
-            return true;
-          }
-        }
-        return false;
-      }
-
-      function startAnimation(hasTransparency) {
-        updateDebug(`🎬 Starting animation - Transparency: ${hasTransparency}`);
-        
-        const fps = 30;
-        const frameDelay = 1000 / fps;
-
-        // Set initial material based on transparency test
-        updateMaterialSettings(hasTransparency);
-
-        const animationInterval = setInterval(() => {
-          currentFrame = (currentFrame + 1) % framePaths.length;
-          const srcId = `#frame${currentFrame + 1}`;
-          
-          plane.setAttribute('material', 'src', srcId);
-          
-          // Update debug every 30 frames to reduce console spam
-          if (currentFrame % 30 === 0) {
-            updateDebug(`Frame: ${currentFrame + 1}/${framePaths.length} - Transparency: ${hasTransparency}`);
-          }
-          
-        }, frameDelay);
-
-        plane.animationInterval = animationInterval;
-      }
-
-      function updateMaterialSettings(hasTransparency) {
-        if (hasTransparency) {
-          // If images have transparency, use these settings
-          plane.setAttribute('material', {
-            transparent: true,
-            alphaTest: 0.01,    // Very sensitive - makes even slight transparency work
-            opacity: 1,
-            side: 'double',
-            alphaMode: 'blend'  // Use blend mode for smooth transparency
-          });
-          updateDebug('Using transparency-optimized material settings');
-        } else {
-          // If no transparency, use simpler settings
-          plane.setAttribute('material', {
-            transparent: false,
-            opacity: 1,
-            side: 'double'
-          });
-          updateDebug('Images have no transparency - using basic material');
-        }
-      }
-
-      // Test different material settings with keyboard
-      document.addEventListener('keydown', (e) => {
-        switch(e.key) {
-          case '1':
-            plane.setAttribute('material', { alphaTest: 0.01, alphaMode: 'blend' });
-            updateDebug('Material: alphaTest 0.01 + blend');
-            break;
-          case '2':
-            plane.setAttribute('material', { alphaTest: 0.05, alphaMode: 'blend' });
-            updateDebug('Material: alphaTest 0.05 + blend');
-            break;
-          case '3':
-            plane.setAttribute('material', { alphaTest: 0.1 });
-            updateDebug('Material: alphaTest 0.1 (no blend)');
-            break;
-          case '4':
-            plane.setAttribute('material', { alphaTest: 0.5 });
-            updateDebug('Material: alphaTest 0.5 (no blend)');
-            break;
-          case '5':
-            plane.setAttribute('material', { transparent: false });
-            updateDebug('Material: transparency disabled');
-            break;
-        }
+      // Start when a single frame loads
+      document.querySelector('#testFrame').addEventListener('load', function() {
+        console.log('First frame loaded, starting animation...');
+        startAnimation();
       });
 
-      // Start when scene loads
-      document.querySelector('a-scene').addEventListener('loaded', function() {
-        initializeAnimation();
+      // Error handling
+      document.querySelector('#testFrame').addEventListener('error', function() {
+        loadingEl.textContent = 'Error loading frames. Check file paths.';
       });
-
-      updateDebug('Press keys 1-5 to test different material settings');
     </script>
   </body>
 </html>
