@@ -1,23 +1,49 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Simple WebAR Animation</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+    </style>
   </head>
   <body>
-    <a-scene embedded arjs>
+    <a-scene 
+      embedded 
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      vr-mode-ui="enabled: false"
+    >
+      <!-- Hiro Marker -->
       <a-marker preset="hiro">
-        <a-image id="anim" src="assets/frame_0001.png" width="1.5" height="1.5" position="0 0.5 0" transparent="true"></a-image>
+        <!-- SMALLER image positioned ABOVE the marker -->
+        <a-image
+          id="animatedImage"
+          src="assets/frame_0001.png"
+          width="0.8"    <!-- Smaller -->
+          height="0.8"   <!-- Smaller -->
+          position="0 1 0"  <!-- Higher up -->
+          transparent="true"
+          alpha-test="0.1"
+        ></a-image>
       </a-marker>
+      
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      let frame = 1;
+      // Simple animation loop
+      const imageEl = document.getElementById('animatedImage');
+      let currentFrame = 1;
+      const totalFrames = 120;
+      const fps = 30;
+      
       setInterval(() => {
-        frame = (frame % 120) + 1;
-        document.getElementById('anim').setAttribute('src', `assets/frame_${String(frame).padStart(4, '0')}.png`);
-      }, 33);
+        currentFrame = (currentFrame % totalFrames) + 1;
+        const frameNum = String(currentFrame).padStart(4, '0');
+        imageEl.setAttribute('src', `assets/frame_${frameNum}.png`);
+      }, 1000 / fps);
     </script>
   </body>
 </html>
