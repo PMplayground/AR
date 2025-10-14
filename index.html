@@ -7,10 +7,13 @@
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
   </head>
   <body>
-    <a-scene embedded arjs>
+ <a-scene embedded arjs>
       <a-marker preset="hiro">
-        <!-- DIRECT IMAGE APPROACH - No preloading -->
-       <a-image src="assets/frame_0001.png" width="2" height="2"></a-image>
+        <a-entity
+          gltf-model="url(assets/animation.glb)"
+          animation-mixer="clip: *; loop: repeat"
+          scale="5 5 5"
+        ></a-entity>
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
