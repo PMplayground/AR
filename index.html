@@ -119,7 +119,7 @@
           plane.setAttribute('material', {
             src: srcId,
             transparent: true,
-            alphaMode: 'blend',  // Adjust this value (0.1 to 0.5)
+            alphaTest: 0.05, alphaMode: 'blend', // Adjust this value (0.1 to 0.5)
             opacity: 1,
             side: 'double'     // Render both sides
           });
@@ -136,6 +136,7 @@
     </script>
   </body>
 </html>
+
 
 
 
