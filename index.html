@@ -1,19 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simple WebAR</title>
+    <title>Working WebAR</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
+        .marker-help {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            z-index: 1000;
+            font-family: Arial;
+        }
     </style>
 </head>
 <body>
-    <a-scene embedded arjs>
-        <a-marker preset="hiro">
-            <a-box color="red" position="0 0.5 0"></a-box>
+    <div class="marker-help">
+        Point camera at Hiro marker<br>
+        Make sure it's well-lit!
+    </div>
+
+    <a-scene 
+        vr-mode-ui="enabled: false"
+        embedded
+        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;'
+    >
+        <!-- Use pattern marker with direct pattern data -->
+        <a-marker 
+            type="pattern" 
+            preset="custom" 
+            url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro"
+        >
+            <a-box 
+                color="green" 
+                position="0 0.5 0"
+                scale="0.5 0.5 0.5"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"
+            ></a-box>
+            <a-text 
+                value="WORKING!" 
+                position="0 1.2 0" 
+                align="center" 
+                color="yellow"
+            ></a-text>
         </a-marker>
+
         <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+        const marker = document.querySelector('a-marker');
+        
+        marker.addEventListener('markerFound', () => {
+            console.log('✅ Marker detected!');
+            document.querySelector('.marker-help').innerHTML = '✅ Marker Found!';
+        });
+        
+        marker.addEventListener('markerLost', () => {
+            console.log('❌ Marker lost');
+            document.querySelector('.marker-help').innerHTML = '❌ Marker Lost - Show Hiro marker';
+        });
+    </script>
 </body>
 </html>
