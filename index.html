@@ -1,38 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PNG Sequence WebAR</title>
+    <title>Markerless WebAR</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
+        .instructions {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            z-index: 1000;
+            font-family: Arial;
+        }
     </style>
 </head>
 <body>
-    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
-        <a-marker preset="hiro">
-            <a-plane
-                id="animatedPlane"
-                src="assets/frame_0001.png"
-                width="1.5"
-                height="1.5"
-                position="0 1 0"
-                transparent="true"
-                alpha-test="0.1"
-                    material="src: frames/frame_0001.png; 
-              transparent: true; 
-              alphaTest: 0.05;
-              opacity: 1;"
-            ></a-plane>
-        </a-marker>
+    <div class="instructions" id="instructions">
+        Move your camera around - the animation will appear in your space!
+    </div>
+
+    <a-scene 
+        embedded 
+        arjs='sourceType: webcam; detectionMode: mono;'
+        vr-mode-ui="enabled: false"
+    >
+        <!-- Animation appears in front of camera -->
+        <a-entity
+            id="animatedPlane"
+            geometry="primitive: plane; width: 1.5; height: 1.5"
+            material="src: assets/frame_0001.png; transparent: true; alphaTest: 0.1"
+            position="0 0 -2"
+            animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"
+        ></a-entity>
+
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // Simple animation loop
         const plane = document.getElementById('animatedPlane');
         let currentFrame = 1;
-        const totalFrames = 120; // Your frame count
+        const totalFrames = 120;
         const fps = 30;
 
         setInterval(() => {
@@ -40,6 +53,12 @@
             const frameNum = String(currentFrame).padStart(4, '0');
             plane.setAttribute('material', 'src', `assets/frame_${frameNum}.png`);
         }, 1000 / fps);
+
+        // Remove instructions after 5 seconds
+        setTimeout(() => {
+            document.getElementById('instructions').style.display = 'none';
+        }, 5000);
     </script>
 </body>
 </html>
+
