@@ -1,106 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Debug WebAR</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        .debug {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 15px;
-            z-index: 1000;
-            font-family: Arial;
-            font-size: 14px;
-        }
-    </style>
 </head>
 <body>
-    <div class="debug" id="debug">Loading... Check browser console (F12)</div>
-
-    <a-scene embedded arjs='sourceType: webcam; detectionMode: mono;' vr-mode-ui="enabled: false">
-        <!-- First, test with a simple colored box -->
-        <a-box 
-            id="testBox"
-            color="red" 
-            position="0 0 -2" 
-            width="0.5" 
-            height="0.5" 
-            depth="0.5"
-            animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"
-        ></a-box>
-
-        <!-- Then try the animation -->
+    <a-scene embedded arjs='sourceType: webcam; detectionMode: mono;'>
         <a-entity
-            id="animatedPlane"
+            id="animation"
             geometry="primitive: plane; width: 1.5; height: 1.5"
             material="transparent: true; alphaTest: 0.1"
-            position="0 1 -2"
-            visible="true"
+            position="0 0 -2"
         ></a-entity>
-
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        const debug = document.getElementById('debug');
-        const plane = document.getElementById('animatedPlane');
-        const testBox = document.getElementById('testBox');
-
-        let currentFrame = 1;
-        const totalFrames = 120;
-        const fps = 30;
-
-        // Test 1: Check if basic 3D works
-        debug.textContent = "Test 1: You should see a rotating RED CUBE";
-
-        // Test 2: Check if images load
-        setTimeout(() => {
-            const testImage = new Image();
-            testImage.onload = function() {
-                debug.textContent += "\n✅ Test 2: PNG files load correctly";
-                console.log("PNG files are accessible");
-                startAnimation();
-            };
-            testImage.onerror = function() {
-                debug.textContent += "\n❌ Test 2: CANNOT load PNG files";
-                console.error("Cannot load PNG files - check file path and names");
-                debug.textContent += "\nTrying to load: assets/frame_0001.png";
-            };
-            testImage.src = 'assets/frame_0001.png';
-        }, 2000);
-
-        function startAnimation() {
-            debug.textContent += "\n🎬 Starting animation...";
-            
-            setInterval(() => {
-                currentFrame = (currentFrame % totalFrames) + 1;
-                const frameNum = String(currentFrame).padStart(4, '0');
-                const src = `assets/frame_${frameNum}.png`;
-                
-                plane.setAttribute('material', {
-                    src: src,
-                    transparent: true,
-                    alphaTest: 0.1,
-                    opacity: 1
-                });
-
-                // Update debug every 30 frames
-                if (currentFrame % 30 === 0) {
-                    debug.textContent = `Frame: ${currentFrame}/120 | File: ${src}`;
-                }
-            }, 1000 / fps);
-        }
-
-        // Check browser console for detailed errors
-        console.log("=== WEBAR DEBUG ===");
-        console.log("1. Check if you see rotating red cube");
-        console.log("2. Check if PNG files load");
-        console.log("3. Animation should start if both work");
+        let frame = 1;
+        setInterval(() => {
+            frame = (frame % 120) + 1;
+            document.getElementById('animation').setAttribute('material', 'src', 
+                `assets/frame_${String(frame).padStart(4, '0')}.png`);
+        }, 33); // 30fps
     </script>
 </body>
 </html>
