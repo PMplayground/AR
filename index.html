@@ -1,69 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Working WebAR</title>
+    <title>WebAR with Kanji Marker</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        .marker-help {
+        .instructions {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 0; left: 0; right: 0;
             background: rgba(0,0,0,0.8);
             color: white;
-            padding: 10px;
+            padding: 15px;
+            text-align: center;
             z-index: 1000;
             font-family: Arial;
         }
     </style>
 </head>
 <body>
-    <div class="marker-help">
-        Point camera at Hiro marker<br>
-        Make sure it's well-lit!
+    <div class="instructions">
+        Use the KANJI marker (not Hiro): 
+        <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/kanji.png" target="_blank">Click to view marker</a>
     </div>
 
-    <a-scene 
-        vr-mode-ui="enabled: false"
-        embedded
-        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;'
-    >
-        <!-- Use pattern marker with direct pattern data -->
-        <a-marker 
-            type="pattern" 
-            preset="custom" 
-            url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro"
-        >
-            <a-box 
-                color="green" 
+    <a-scene embedded arjs>
+        <a-marker preset="kanji">
+            <a-sphere 
+                color="blue" 
                 position="0 0.5 0"
-                scale="0.5 0.5 0.5"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"
-            ></a-box>
-            <a-text 
-                value="WORKING!" 
-                position="0 1.2 0" 
-                align="center" 
-                color="yellow"
-            ></a-text>
+                radius="0.3"
+                animation="property: position; to: 0 1 0; loop: true; dir: alternate; dur: 1000"
+            ></a-sphere>
         </a-marker>
-
         <a-entity camera></a-entity>
     </a-scene>
-
-    <script>
-        const marker = document.querySelector('a-marker');
-        
-        marker.addEventListener('markerFound', () => {
-            console.log('✅ Marker detected!');
-            document.querySelector('.marker-help').innerHTML = '✅ Marker Found!';
-        });
-        
-        marker.addEventListener('markerLost', () => {
-            console.log('❌ Marker lost');
-            document.querySelector('.marker-help').innerHTML = '❌ Marker Lost - Show Hiro marker';
-        });
-    </script>
 </body>
 </html>
