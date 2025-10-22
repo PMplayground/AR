@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Location-Based AR</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
+    <title>Simple WebAR - Model Viewer</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; padding: 20px; font-family: Arial; }
+        model-viewer { width: 100%; height: 400px; }
     </style>
 </head>
 <body>
-    <a-scene embedded arjs='sourceType: webcam; detectionMode: mono;'>
-        <!-- This will appear in your camera view without needing a marker -->
-        <a-box 
-            color="red" 
-            position="0 0 -2"
-            scale="0.5 0.5 0.5"
-            animation="property: rotation; to: 360 360 360; loop: true; dur: 3000"
-        ></a-box>
-        <a-entity camera></a-entity>
-    </a-scene>
+    <h1>Simple WebAR Example</h1>
+    <p>Click the AR button to view in your space</p>
+    
+    <model-viewer
+        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        alt="A 3D model of an astronaut"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        environment-image="neutral"
+        auto-rotate
+        camera-controls
+    >
+    </model-viewer>
+    
+    <p>Works on Android (Chrome) and iOS (Safari)</p>
 </body>
 </html>
