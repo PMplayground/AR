@@ -1,38 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebAR with Kanji Marker</title>
+    <title>Location-Based AR</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        .instructions {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            z-index: 1000;
-            font-family: Arial;
-        }
     </style>
 </head>
 <body>
-    <div class="instructions">
-        Use the KANJI marker (not Hiro): 
-        <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/kanji.png" target="_blank">Click to view marker</a>
-    </div>
-
-    <a-scene embedded arjs>
-        <a-marker preset="kanji">
-            <a-sphere 
-                color="blue" 
-                position="0 0.5 0"
-                radius="0.3"
-                animation="property: position; to: 0 1 0; loop: true; dir: alternate; dur: 1000"
-            ></a-sphere>
-        </a-marker>
+    <a-scene embedded arjs='sourceType: webcam; detectionMode: mono;'>
+        <!-- This will appear in your camera view without needing a marker -->
+        <a-box 
+            color="red" 
+            position="0 0 -2"
+            scale="0.5 0.5 0.5"
+            animation="property: rotation; to: 360 360 360; loop: true; dur: 3000"
+        ></a-box>
         <a-entity camera></a-entity>
     </a-scene>
 </body>
