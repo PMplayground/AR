@@ -3,17 +3,28 @@
 <head>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
+    <!-- Animation component -->
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
 </head>
 <body>
     <a-scene embedded arjs='sourceType: webcam; detectionMode: mono;'>
-        <a-image
-            src="assets/frame_0001.png"
-            width="1.5"
-            height="1.5"
+        <a-entity
+            id="animatedModel"
+            gltf-model="AnimatedGLB.glb"
             position="0 0 -2"
-            transparent="true"
-        ></a-image>
+            scale="1 1 1"
+        ></a-entity>
         <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+        // Wait for model to load, then play animations
+        document.querySelector('#animatedModel').addEventListener('model-loaded', () => {
+            const model = document.querySelector('#animatedModel');
+            model.setAttribute('animation-mixer', {clip: '*', loop: 'repeat'});
+            console.log('GLB loaded and animations started!');
+        });
+    </script>
 </body>
 </html>
+
